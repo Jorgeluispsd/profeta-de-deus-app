@@ -54,17 +54,6 @@ export default function HomeScreen() {
         </ThemedText>
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
-          <MapView
-            style={styles.map}
-            initialRegion={{
-              latitude: -23.412778,
-  longitude: -46.884167,
-  latitudeDelta: 0.01,
-  longitudeDelta: 0.01
-            }}
-          />
-        </ThemedView>
-      <ThemedView style={styles.stepContainer}>
         <ThemedText type="subtitle">Step 4: Teste</ThemedText>
         <ThemedText>
           Um simples teste de uso

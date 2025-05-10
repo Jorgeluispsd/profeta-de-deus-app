@@ -1,10 +1,18 @@
-import { Image, Platform, StyleSheet, } from 'react-native';
+import { Image, Platform, StyleSheet, ScrollView, View, Text, Dimensions } from 'react-native';
 
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import MapView from 'react-native-maps';
+
+const { width } = Dimensions.get('window');
+
+const cards = [
+  { id: 1, title: 'Encontro de Mulheres', content: 'Dia 20/05 às 18h' },
+  { id: 2, title: 'Culto Jovem', content: 'Dia 10/06 às 19h' },
+  { id: 3, title: 'Batismo', content: 'Dia 25/06 às 10h' },
+];
 
 export default function HomeScreen() {
   return (
@@ -53,17 +61,35 @@ export default function HomeScreen() {
           Dia 10 de Maio de 2025, as 19:00.
         </ThemedText>
       </ThemedView>
+
+      {/* 🎯 Carrossel de Eventos */}
+      <ThemedView style={styles.carouselContainer}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          pagingEnabled
+          contentContainerStyle={styles.carouselScroll}
+        >
+          {cards.map((card) => (
+            <View key={card.id} style={styles.card}>
+              <Text style={styles.cardTitle}>{card.title}</Text>
+              <Text>{card.content}</Text>
+            </View>
+          ))}
+        </ScrollView>
+      </ThemedView>
+
       <ThemedView style={styles.stepContainer}>
-          <MapView
-            style={styles.map}
-            initialRegion={{
-              latitude: -23.412778,
-  longitude: -46.884167,
-  latitudeDelta: 0.01,
-  longitudeDelta: 0.01
-            }}
-          />
-        </ThemedView>
+        <MapView
+          style={styles.map}
+          initialRegion={{
+            latitude: -23.412778,
+            longitude: -46.884167,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01
+          }}
+        />
+      </ThemedView>
       <ThemedView style={styles.stepContainer}>
         <ThemedText type="subtitle">Step 4: Teste</ThemedText>
         <ThemedText>
@@ -115,5 +141,24 @@ const styles = StyleSheet.create({
   map: {
     width: '100%',
     height: '50%',
+  },
+  carouselContainer: {
+    marginVertical: 16,
+  },
+  carouselScroll: {
+    paddingHorizontal: 10,
+  },
+  card: {
+    width: width * 0.8,
+    marginHorizontal: 10,
+    padding: 20,
+    backgroundColor: '#eee',
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  cardTitle: {
+    fontWeight: 'bold',
+    fontSize: 18,
+    marginBottom: 8,
   },
 });

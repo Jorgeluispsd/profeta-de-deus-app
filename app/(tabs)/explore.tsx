@@ -1,109 +1,173 @@
-import { StyleSheet, Image, Platform } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import  versiculosPorCapitulo  from './versiculosPorCapitulo'; // Dados importados separados
 
-import { Collapsible } from '@/components/Collapsible';
-import { ExternalLink } from '@/components/ExternalLink';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+const livrosBiblia = Object.keys(versiculosPorCapitulo).map((livro) => ({
+  nome: livro,
+  capitulos: Object.keys(versiculosPorCapitulo[livro]).length,
+}));
 
-export default function TabTwoScreen() {
+export default function TelaBiblia() {
+  const [livroExpandido, setLivroExpandido] = useState<string | null>(null);
+  const [capituloAtivo, setCapituloAtivo] = useState<{ livro: string; capitulo: number } | null>(null);
+  const [versiculoSelecionado, setVersiculoSelecionado] = useState<number | null>(null);
+
+  const handleSelecionarLivro = (nome: string) => {
+    setLivroExpandido(livroExpandido === nome ? null : nome);
+    setCapituloAtivo(null);
+    setVersiculoSelecionado(null);
+  };
+
+  const handleSelecionarCapitulo = (livro: string, capitulo: number) => {
+    setCapituloAtivo({ livro, capitulo });
+    setVersiculoSelecionado(null);
+  };
+
+  const handleSelecionarVersiculo = (versiculo: number) => {
+    setVersiculoSelecionado(versiculo);
+  };
+
+  const obterVersiculosPorCapitulo = (livro: string, capitulo: number): number => {
+    return versiculosPorCapitulo[livro]?.[capitulo] ?? 0;
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Explore</ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image source={require('@/assets/images/react-logo.png')} style={{ alignSelf: 'center' }} />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Custom fonts">
-        <ThemedText>
-          Open <ThemedText type="defaultSemiBold">app/_layout.tsx</ThemedText> to see how to load{' '}
-          <ThemedText style={{ fontFamily: 'SpaceMono' }}>
-            custom fonts such as this one.
-          </ThemedText>
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/versions/latest/sdk/font">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user's current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful <ThemedText type="defaultSemiBold">react-native-reanimated</ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+    <View style={styles.container}>
+      <Text style={styles.titulo}>Livros da Bíblia</Text>
+      <ScrollView>
+        {livrosBiblia.map((livro) => (
+          <View key={livro.nome}>
+            <TouchableOpacity
+              style={styles.livroContainer}
+              onPress={() => handleSelecionarLivro(livro.nome)}
+            >
+              <Text style={styles.livroTexto}>{livro.nome}</Text>
+              <Ionicons
+                name={livroExpandido === livro.nome ? 'chevron-up' : 'chevron-down'}
+                size={20}
+                color="gray"
+              />
+            </TouchableOpacity>
+
+            {livroExpandido === livro.nome && (
+              <>
+                <Text style={styles.subtitulo}>Capítulo</Text>
+                <View style={styles.capitulosContainer}>
+                  {Array.from({ length: livro.capitulos }, (_, i) => i + 1).map((cap) => (
+                    <TouchableOpacity
+                      key={cap}
+                      style={styles.botaoNumero}
+                      onPress={() => handleSelecionarCapitulo(livro.nome, cap)}
+                    >
+                      <Text style={styles.numeroTexto}>{cap}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </>
+            )}
+
+            {capituloAtivo?.livro === livro.nome && (
+              <>
+                <Text style={styles.subtitulo}>Versículo</Text>
+                <View style={styles.versiculosContainer}>
+                  {Array.from({ length: obterVersiculosPorCapitulo(livro.nome, capituloAtivo.capitulo) }, (_, i) => i + 1).map((vers) => (
+                    <TouchableOpacity
+                      key={vers}
+                      style={styles.botaoNumero}
+                      onPress={() => handleSelecionarVersiculo(vers)}
+                    >
+                      <Text style={styles.numeroTexto}>{vers}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </>
+            )}
+
+            {versiculoSelecionado !== null && capituloAtivo?.livro === livro.nome && (
+              <View style={styles.escrituraBox}>
+                <Text style={styles.escrituraTexto}>
+                  Esta é uma mensagem de teste para o versículo {versiculoSelecionado} de {capituloAtivo.livro} {capituloAtivo.capitulo}.
+                </Text>
+              </View>
+            )}
+          </View>
+        ))}
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  container: { flex: 1, backgroundColor: '#121212', paddingTop: 50 },
+  titulo: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#fff',
+    textAlign: 'center',
+    marginBottom: 10,
   },
-  titleContainer: {
+  subtitulo: {
+    fontSize: 16,
+    color: '#ccc',
+    fontWeight: '600',
+    marginLeft: 15,
+    marginTop: 10,
+  },
+  livroContainer: {
     flexDirection: 'row',
-    gap: 8,
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    backgroundColor: '#1e1e1e',
+    borderBottomWidth: 1,
+    borderBottomColor: '#333',
+  },
+  livroTexto: {
+    fontSize: 16,
+    color: '#fff',
+  },
+  capitulosContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: 10,
+    marginBottom: 10,
+  },
+  versiculosContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: 10,
+    marginBottom: 10,
+  },
+  botaoNumero: {
+    width: 40,
+    height: 40,
+    backgroundColor: '#333',
+    margin: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 5,
+  },
+  numeroTexto: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  escrituraBox: {
+    margin: 10,
+    backgroundColor: '#1e1e1e',
+    padding: 15,
+    borderRadius: 10,
+    borderColor: '#444',
+    borderWidth: 1,
+  },
+  escrituraTexto: {
+    color: '#fff',
+    fontSize: 16,
   },
 });

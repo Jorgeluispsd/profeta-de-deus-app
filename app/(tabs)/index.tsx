@@ -54,7 +54,6 @@ export default function HomeScreen() {
           {"\n"}
         </ThemedText>
         
-        
       </ThemedView>
 
       {/* 🎯 Carrossel de Eventos */}
@@ -78,6 +77,7 @@ export default function HomeScreen() {
             </View>
           ))}
         </ScrollView>
+
       </ThemedView>
 
       {/* Onde fica a igreja */}

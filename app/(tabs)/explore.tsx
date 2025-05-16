@@ -7,7 +7,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import  versiculosPorCapitulo  from './versiculosPorCapitulo'; // Dados importados separados
+import  versiculosPorCapitulo  from '../../functions/versiculos/versiculosPorCapitulo'; // Dados importados separados
 
 const livrosBiblia = Object.keys(versiculosPorCapitulo).map((livro) => ({
   nome: livro,

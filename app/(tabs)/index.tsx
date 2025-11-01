@@ -87,18 +87,18 @@ export default function HomeScreen() {
           Nos encontramos na Rua Marli, 191 - Recanto Silvestre (Fazendinha) - São Paulo - SP.
         </ThemedText>
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        {/*  Mapa */}
-        <MapView
-          style={styles.map}
-          initialRegion={{
-            latitude: -23.412778,
-            longitude: -46.884167,
-            latitudeDelta: 0.01,
-            longitudeDelta: 0.01
-          }}
-        />
-      </ThemedView>
+      {/*<ThemedView style={styles.stepContainer}>*/}
+      {/*  /!*  Mapa *!/*/}
+      {/*  <MapView*/}
+      {/*    style={styles.map}*/}
+      {/*    initialRegion={{*/}
+      {/*      latitude: -23.412778,*/}
+      {/*      longitude: -46.884167,*/}
+      {/*      latitudeDelta: 0.01,*/}
+      {/*      longitudeDelta: 0.01*/}
+      {/*    }}*/}
+      {/*  />*/}
+      {/*</ThemedView>*/}
     </ParallaxScrollView>
   );
 }

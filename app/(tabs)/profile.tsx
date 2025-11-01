@@ -1,144 +1,123 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, Image, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, Text, StyleSheet, ScrollView, TextInput, Image, TouchableOpacity, useColorScheme } from 'react-native';
 
 export default function HomeScreen() {
-  return (
-    <View style={styles.container}>
-      <ScrollView style={styles.content}>
-        <Text style={styles.greeting}>Olá, Jorge!</Text>
-        <Text style={styles.title}>Profetas de Deus</Text>
+    const scheme = useColorScheme();
+    const dark = scheme === 'dark' || true;
 
-        <TextInput
-          placeholder="Pesquisar tópico"
-          style={styles.searchBox}
-        />
+    const colors = {
+        background: '#0E1416',
+        surface: '#11181A',
+        muted: '#A7B0B3',
+        primary: '#9A7B4F', // dourado
+        accent: '#1E7A8C',
+        white: '#F6F7F8',
+    };
 
-        <Text style={styles.sectionTitle}>Cultos</Text>
-        <View style={styles.serviceRow}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.serviceRow}>
-            <View style={styles.serviceCard}>
-              <Text style={styles.dayLabel}>Domingo</Text>
-              <Text style={styles.serviceTitle}>Culto da Família</Text>
-              <View style={styles.timeRow}>
-                <Text style={styles.time}>8hrs</Text>
-                <Text style={styles.time}>15hrs</Text>
-                <Text style={styles.time}>18hrs</Text>
-              </View>
-              <Text style={styles.highlight}>✓ Escola Dominical</Text>
-              <Text style={styles.address}>R. Marli, 191 - Fazendinha</Text>
-            </View>
+    const cards = [
+        { id: 1, title: 'Culto da Família', day: 'Domingo', times: ['8hrs','15hrs','18hrs'], highlight: '✓ Escola Dominical', address: 'R. Marli, 191 - Fazendinha' },
+        { id: 2, title: 'Culto da Libertação', day: 'Quarta', times: ['8hrs','15hrs','18hrs'], highlight: '✓ Escola Dominical', address: 'R. Marli, 191 - Fazendinha' },
+    ];
 
-            <View style={styles.serviceCard}>
-              <Text style={styles.dayLabel}>Quarta</Text>
-              <Text style={styles.serviceTitle}>Culto da Libertação</Text>
-              <View style={styles.timeRow}>
-                <Text style={styles.time}>8hrs</Text>
-                <Text style={styles.time}>15hrs</Text>
-                <Text style={styles.time}>18hrs</Text>
-              </View>
-              <Text style={styles.highlight}>✓ Escola Dominical</Text>
-              <Text style={styles.address}>R. Marli, 191 - Fazendinha</Text>
-            </View>
-          </ScrollView>
+    const events = [
+        { id: 1, date: '09 MAR', title: 'Culto da Família - 20hrs', subtitle: '+Pr Thony e Pra Luzia', address: 'R. Marli, 191 - Fazendinha', image: require('../../assets/images/card1.png') },
+        { id: 2, date: '16 MAR', title: 'Culto da Cura', subtitle: '+Pr Thony', address: 'R. Marli, 191 - Fazendinha', image: require('../../assets/images/card2.png') },
+    ];
+
+    return (
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
+            <ScrollView style={styles.content}>
+                <Text style={[styles.greeting, { color: colors.muted }]}>Olá, Jorge!</Text>
+                <Text style={[styles.title, { color: colors.white }]}>Profetas de Deus</Text>
+
+                <TextInput
+                    placeholder="Pesquisar tópico"
+                    placeholderTextColor={colors.muted}
+                    style={[styles.searchBox, { backgroundColor: colors.surface, color: colors.white, borderColor: colors.muted }]}
+                />
+
+                <Text style={[styles.sectionTitle, { color: colors.primary }]}>Cultos</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.serviceRow}>
+                    {cards.map((c) => (
+                        <View key={c.id} style={[styles.serviceCard, { backgroundColor: colors.surface, borderColor: 'rgba(255,255,255,0.08)' }]}>
+                            <Text style={[styles.dayLabel, { backgroundColor: colors.accent }]}>{c.day}</Text>
+                            <Text style={[styles.serviceTitle, { color: colors.white }]}>{c.title}</Text>
+                            <View style={styles.timeRow}>
+                                {c.times.map((t, idx) => <Text key={idx} style={[styles.time, { backgroundColor: colors.background, color: colors.white, borderWidth: 1, borderColor: colors.primary }]}>{t}</Text>)}
+                            </View>
+                            <Text style={[styles.highlight, { color: colors.primary }]}>{c.highlight}</Text>
+                            <Text style={[styles.address, { color: colors.muted }]}>{c.address}</Text>
+                        </View>
+                    ))}
+                </ScrollView>
+
+                <Text style={[styles.sectionTitle, { color: colors.primary }]}>Próximos eventos</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    {events.map((e) => (
+                        <View key={e.id} style={[styles.eventCard, { backgroundColor: colors.surface, borderColor: 'rgba(255,255,255,0.08)' }]}>
+                            <View style={styles.eventImageWrapper}>
+                                <View style={[styles.dateBox, { backgroundColor: colors.accent }]}>
+                                    <Text style={[styles.date, { color: colors.white }]}>{e.date}</Text>
+                                </View>
+                                <Image source={e.image} style={styles.eventImage} />
+                            </View>
+                            <Text style={[styles.eventTitle, { color: colors.white }]}>{e.title}</Text>
+                            <Text style={[styles.eventSubtitle, { color: colors.muted }]}>{e.subtitle}</Text>
+                            <Text style={[styles.address, { color: colors.muted }]}>{e.address}</Text>
+                        </View>
+                    ))}
+                </ScrollView>
+
+            </ScrollView>
         </View>
-
-        <Text style={styles.sectionTitle}>Próximos eventos</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View style={styles.eventCard}>
-            <View style={styles.eventImageWrapper}>
-              <View style={styles.dateBox}>
-                <Text style={styles.date}>09 MAR</Text>
-              </View>
-              <Image source={require('../../assets/images/card1.png')} style={styles.eventImage} />
-            </View>
-            <Text style={styles.eventTitle}>Culto da Família - <Text style={{ fontWeight: 'bold' }}>20hrs</Text></Text>
-            <Text style={styles.eventSubtitle}>+Pr Thony e Pra Luzia</Text>
-            <Text style={styles.address}>R. Marli, 191 - Fazendinha</Text>
-          </View>
-
-          <View style={styles.eventCard}>
-            <View style={styles.eventImageWrapper}>
-              <View style={styles.dateBox}>
-                <Text style={styles.date}>16 MAR</Text>
-              </View>
-              <Image source={require('../../assets/images/card2.png')} style={styles.eventImage} />
-            </View>
-            <Text style={styles.eventTitle}>Culto da Cura</Text>
-            <Text style={styles.eventSubtitle}>+Pr Thony</Text>
-            <Text style={styles.address}>R. Marli, 191 - Fazendinha</Text>
-          </View>
-        </ScrollView>
-
-      </ScrollView>
-    </View>
-
-  );
+    );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  content: {
-    padding: 20,
-    paddingTop: 50,
-  },
-  greeting: { fontSize: 14, color: '#555' },
-  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
-  searchBox: {
-    backgroundColor: '#eee',
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 20,
-  },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginTop: 20 },
-  serviceRow: { flexDirection: 'row', gap: 10, marginTop: 10 },
-  serviceCard: {
-    backgroundColor: '#ffff',
-    borderWidth: 1,
-    borderColor: '#555',
-    borderRadius: 12,
-    padding: 15,
-    width: 180,
-    marginRight: 10
-  },
-  dayLabel: { backgroundColor: '#3f51b5', color: '#fff', padding: 4, borderRadius: 4, alignSelf: 'flex-start' },
-  serviceTitle: { fontSize: 16, fontWeight: 'bold', marginVertical: 8 },
-  timeRow: { flexDirection: 'row', gap: 8 },
-  time: { backgroundColor: '#eee', padding: 4, borderRadius: 6 },
-  highlight: { color: '#3f51b5', marginVertical: 6 },
-  address: { fontSize: 12, color: '#777' },
-  eventCard: {
-    backgroundColor: '#ffff',
-    borderWidth: 1, // Largura da borda
-    borderColor: '#555', // Cinza escuro
-    borderRadius: 12,
-    marginTop: 20,
-    marginRight: 10,
-    width: 200,
-    padding: 10,
-  },
-  dateBox: {
-    position: 'absolute',
-    backgroundColor: '#dbeafe',
-    padding: 6,
-    borderRadius: 8,
-    top: 8,
-    left: 8,
-    zIndex: 1,
-  },
-  date: { fontSize: 12, textAlign: 'center' },
-  eventImage: { width: '100%', height: 100, borderRadius: 8, zIndex: 0, },
-  eventTitle: { marginTop: 8, fontSize: 14 },
-  eventSubtitle: { fontSize: 12, color: '#555' },
-  navBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    padding: 10,
-    borderTopWidth: 1,
-    borderColor: '#ddd',
-  },
-  eventImageWrapper: {
-  position: 'relative',
-},
-
+    container: { flex: 1 },
+    content: { padding: 20, paddingTop: 50 },
+    greeting: { fontSize: 14 },
+    title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
+    searchBox: {
+        padding: 10,
+        borderRadius: 12,
+        marginBottom: 20,
+        borderWidth: 1,
+    },
+    sectionTitle: { fontSize: 18, fontWeight: 'bold', marginTop: 20, marginBottom: 12 },
+    serviceRow: { flexDirection: 'row', gap: 10 },
+    serviceCard: {
+        borderRadius: 14,
+        padding: 15,
+        width: 180,
+        marginRight: 12,
+        shadowColor: '#000',
+        shadowOpacity: 0.25,
+        shadowOffset: { width: 0, height: 6 },
+        shadowRadius: 10,
+        elevation: 8,
+    },
+    dayLabel: { color: '#fff', padding: 4, borderRadius: 4, alignSelf: 'flex-start', fontSize: 12, fontWeight: '700' },
+    serviceTitle: { fontSize: 16, fontWeight: 'bold', marginVertical: 8 },
+    timeRow: { flexDirection: 'row', gap: 8, marginBottom: 6 },
+    time: { paddingVertical: 4, paddingHorizontal: 8, borderRadius: 6, fontSize: 12 },
+    highlight: { marginVertical: 6, fontSize: 12, fontWeight: '700' },
+    address: { fontSize: 12 },
+    eventCard: {
+        borderRadius: 14,
+        width: 200,
+        marginRight: 12,
+        padding: 10,
+        shadowColor: '#000',
+        shadowOpacity: 0.25,
+        shadowOffset: { width: 0, height: 6 },
+        shadowRadius: 10,
+        elevation: 8,
+    },
+    eventImageWrapper: { position: 'relative' },
+    dateBox: { position: 'absolute', top: 8, left: 8, padding: 6, borderRadius: 8, zIndex: 1 },
+    date: { fontSize: 12, textAlign: 'center', fontWeight: '700' },
+    eventImage: { width: '100%', height: 100, borderRadius: 8 },
+    eventTitle: { marginTop: 8, fontSize: 14, fontWeight: '600' },
+    eventSubtitle: { fontSize: 12 },
 });

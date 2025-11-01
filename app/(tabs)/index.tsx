@@ -24,113 +24,119 @@ const cards = [
 
 export default function HomeScreen() {
     const scheme = useColorScheme();
-    const dark = scheme === 'dark' || true; // prioriza dark (solicitação do usuário)
-    const { width } = useWindowDimensions();
+    const dark = scheme === 'dark' || true;
+    const { width, height } = useWindowDimensions();
 
     const colors = {
-        background: '#0E1416', // muito escuro
-        surface: '#11181A', // cards
-        muted: '#A7B0B3', // texto secundário
-        primary: '#9A7B4F', // dourado suave
-        accent: '#1E7A8C', // teal accent se necessário
+        background: '#0E1416',
+        surface: '#11181A',
+        muted: '#A7B0B3',
+        primary: '#9A7B4F',
+        accent: '#1E7A8C',
         white: '#F6F7F8',
     };
 
     return (
         <>
-            <View style={styles.root}>
-            <StatusBar barStyle="light-content" backgroundColor={colors.background} />
-            <ParallaxScrollView
-                headerBackgroundColor={{ light: '#FFFFFF', dark: colors.background }}
-                headerImage={
-                    <View style={[styles.headerWrapper, { width, backgroundColor: '#0F2B2F' }]}>
-                        <Image
-                            source={require('@/assets/images/pombo.jpg')}
-                            style={styles.headerImage}
-                            resizeMode="contain"
-                        />
-                        <View style={styles.headerBadge}>
-                            <Text style={[styles.headerBadgeText, { color: colors.white }]}>Igreja</Text>
+            {/* fundo absoluto cobrindo toda a tela */}
+            <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.background }]} /> {/* AJUSTE DE FUNDO */}
+
+            <View style={[styles.root, { backgroundColor: colors.background }]}>
+                <StatusBar barStyle="light-content" backgroundColor={colors.background} translucent /> {/* AJUSTE DE FUNDO */}
+                <ParallaxScrollView
+                    headerBackgroundColor={{ light: '#FFFFFF', dark: colors.background }}
+                    headerImage={
+                        <View style={[styles.headerWrapper, { width, backgroundColor: '#0F2B2F' }]}>
+                            <Image
+                                source={require('@/assets/images/pombo.jpg')}
+                                style={styles.headerImage}
+                                resizeMode="contain"
+                            />
+                            <View style={styles.headerBadge}>
+                                <Text style={[styles.headerBadgeText, { color: colors.white }]}>Igreja</Text>
+                            </View>
                         </View>
-                    </View>
-                }
-            >
-                <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
-                    {/* Título central */}
-                    <View style={styles.titleRow}>
-                        <Text style={[styles.mainTitle, { color: colors.white }]}>Igreja Profetas de Deus</Text>
-                        <HelloWave />
-                    </View>
-
-                    {/* Sobre - cartão grande */}
-                    <View style={[styles.sectionCard, { backgroundColor: colors.surface }]}>
-                        <View style={styles.sectionHeader}>
-                            <Text style={[styles.sectionTitle, { color: colors.primary }]}>Quem somos</Text>
-                            <View style={styles.underline} />
+                    }
+                >
+                    <SafeAreaView style={[styles.safe, { backgroundColor: 'transparent' }]}> {/* AJUSTE DE FUNDO */}
+                        <View style={styles.titleRow}>
+                            <Text style={[styles.mainTitle, { color: colors.white }]}>Igreja Profetas de Deus</Text>
+                            <HelloWave />
                         </View>
-                        <Text style={[styles.sectionText, { color: colors.muted }]}>
-                            Somos uma Igreja Cristã dedicada a levar a palavra de Deus a todos os povos.
-                            {'\n\n'}
-                            Fundada em 2016, crescemos em fé e serviço — campanhas evangelísticas e trabalho social
-                            são pilares do nosso ministério.
-                        </Text>
-                        <TouchableOpacity style={[styles.cta, { borderColor: colors.primary }]}>
-                            <Text style={[styles.ctaText, { color: colors.primary }]}>Saiba mais</Text>
-                        </TouchableOpacity>
-                    </View>
 
-                    {/* Próximos eventos - carrossel simples */}
-                    <View style={styles.rowHeader}>
-                        <Text style={[styles.rowTitle, { color: colors.white }]}>Próximos Eventos</Text>
-                        <Text style={[styles.rowAction, { color: colors.muted }]}>Ver todos</Text>
-                    </View>
+                        <View style={[styles.sectionCard, { backgroundColor: colors.surface }]}>
+                            <View style={styles.sectionHeader}>
+                                <Text style={[styles.sectionTitle, { color: colors.primary }]}>Quem somos</Text>
+                                <View style={styles.underline} />
+                            </View>
+                            <Text style={[styles.sectionText, { color: colors.muted }]}>
+                                Somos uma Igreja Cristã dedicada a levar a palavra de Deus a todos os povos.
+                                {'\n\n'}
+                                Fundada em 2016, crescemos em fé e serviço — campanhas evangelísticas e trabalho social
+                                são pilares do nosso ministério.
+                            </Text>
+                            <TouchableOpacity style={[styles.cta, { borderColor: colors.primary }]}>
+                                <Text style={[styles.ctaText, { color: colors.primary }]}>Saiba mais</Text>
+                            </TouchableOpacity>
+                        </View>
 
-                    <ScrollView
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={styles.carousel}
-                        snapToInterval={Math.round(width * 0.78) + 16}
-                        decelerationRate="fast"
-                    >
-                        {cards.map((c) => (
-                            <View key={c.id} style={[styles.eventCard, { width: Math.round(width * 0.78), backgroundColor: '#0D1516' }]}>
-                                <Image source={c.image} style={styles.eventImage} />
-                                <View style={styles.eventBody}>
-                                    <Text style={[styles.eventTitle, { color: colors.white }]}>{c.title}</Text>
-                                    <Text style={[styles.eventMeta, { color: colors.muted }]}>{c.content}</Text>
-                                    <View style={styles.eventFooter}>
-                                        <TouchableOpacity style={[styles.ghostBtn, { borderColor: colors.primary }]}>
-                                            <Text style={[styles.ghostText, { color: colors.primary }]}>Detalhes</Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity style={[styles.primaryBtn, { backgroundColor: colors.primary }]}>
-                                            <Text style={[styles.primaryText, { color: colors.surface }]}>Participar</Text>
-                                        </TouchableOpacity>
+                        <View style={styles.rowHeader}>
+                            <Text style={[styles.rowTitle, { color: colors.white }]}>Próximos Eventos</Text>
+                            <Text style={[styles.rowAction, { color: colors.muted }]}>Ver todos</Text>
+                        </View>
+
+                        <ScrollView
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={styles.carousel}
+                            snapToInterval={Math.round(width * 0.78) + 16}
+                            decelerationRate="fast"
+                        >
+                            {cards.map((c) => (
+                                <View
+                                    key={c.id}
+                                    style={[
+                                        styles.eventCard,
+                                        { width: Math.round(width * 0.78), backgroundColor: '#0D1516' },
+                                    ]}
+                                >
+                                    <Image source={c.image} style={styles.eventImage} />
+                                    <View style={styles.eventBody}>
+                                        <Text style={[styles.eventTitle, { color: colors.white }]}>{c.title}</Text>
+                                        <Text style={[styles.eventMeta, { color: colors.muted }]}>{c.content}</Text>
+                                        <View style={styles.eventFooter}>
+                                            <TouchableOpacity style={[styles.ghostBtn, { borderColor: colors.primary }]}>
+                                                <Text style={[styles.ghostText, { color: colors.primary }]}>Detalhes</Text>
+                                            </TouchableOpacity>
+                                            <TouchableOpacity style={[styles.primaryBtn, { backgroundColor: colors.primary }]}>
+                                                <Text style={[styles.primaryText, { color: colors.surface }]}>Participar</Text>
+                                            </TouchableOpacity>
+                                        </View>
                                     </View>
                                 </View>
+                            ))}
+                        </ScrollView>
+
+                        <View style={[styles.sectionCard, { backgroundColor: colors.surface }]}>
+                            <View style={styles.sectionHeader}>
+                                <Text style={[styles.sectionTitle, { color: colors.primary }]}>Onde nos encontrar</Text>
                             </View>
-                        ))}
-                    </ScrollView>
-
-                    {/* Localização */}
-                    <View style={[styles.sectionCard, { backgroundColor: colors.surface }]}>
-                        <View style={styles.sectionHeader}>
-                            <Text style={[styles.sectionTitle, { color: colors.primary }]}>Onde nos encontrar</Text>
+                            <Text style={[styles.sectionText, { color: colors.muted }]}>
+                                Rua Marli, 191 — Recanto Silvestre (Fazendinha) — São Paulo - SP.
+                            </Text>
+                            <View style={{ height: 10 }} />
+                            <TouchableOpacity style={[styles.primaryBtn, { backgroundColor: colors.primary }]}>
+                                <Text style={[styles.primaryText, { color: colors.surface }]}>Como chegar</Text>
+                            </TouchableOpacity>
                         </View>
-                        <Text style={[styles.sectionText, { color: colors.muted }]}>
-                            Rua Marli, 191 — Recanto Silvestre (Fazendinha) — São Paulo - SP.
-                        </Text>
-                        <View style={{ height: 10 }} />
-                        <TouchableOpacity style={[styles.primaryBtn, { backgroundColor: colors.primary }]}>
-                            <Text style={[styles.primaryText, { color: colors.surface }]}>Como chegar</Text>
-                        </TouchableOpacity>
-                    </View>
 
-                    {/* Rodapé discreto */}
-                    <View style={styles.footer}>
-                        <Text style={[styles.footerText, { color: colors.muted }]}>© {new Date().getFullYear()} Profetas de Deus</Text>
-                    </View>
-                </SafeAreaView>
-            </ParallaxScrollView>
+                        <View style={styles.footer}>
+                            <Text style={[styles.footerText, { color: colors.muted }]}>
+                                © {new Date().getFullYear()} Profetas de Deus
+                            </Text>
+                        </View>
+                    </SafeAreaView>
+                </ParallaxScrollView>
             </View>
         </>
     );
@@ -140,15 +146,12 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
     root: {
         flex: 1,
-        backgroundColor: '#0C1618', // cobre tudo
+        backgroundColor: '#0C1618', // cobre tudo // AJUSTE DE FUNDO
     },
-
     safe: {
         flex: 1,
         paddingBottom: 40,
     },
-
-    /* Header */
     headerWrapper: {
         height: 220,
         alignItems: 'center',
@@ -174,8 +177,6 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         letterSpacing: 0.5,
     },
-
-    /* Title area */
     titleRow: {
         marginTop: 8,
         marginHorizontal: 22,
@@ -190,8 +191,6 @@ const styles = StyleSheet.create({
         letterSpacing: 0.2,
         textAlign: 'center',
     },
-
-    /* Section card - big */
     sectionCard: {
         marginHorizontal: 16,
         marginTop: 18,
@@ -222,7 +221,6 @@ const styles = StyleSheet.create({
         lineHeight: 20,
         marginTop: 8,
     },
-
     cta: {
         marginTop: 14,
         paddingVertical: 8,
@@ -234,8 +232,6 @@ const styles = StyleSheet.create({
     ctaText: {
         fontWeight: '700',
     },
-
-    /* Row header */
     rowHeader: {
         marginHorizontal: 16,
         marginTop: 18,
@@ -250,8 +246,6 @@ const styles = StyleSheet.create({
     rowAction: {
         fontSize: 13,
     },
-
-    /* Carousel */
     carousel: {
         paddingVertical: 12,
         paddingHorizontal: 12,
@@ -284,7 +278,6 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         gap: 8,
     },
-
     ghostBtn: {
         paddingHorizontal: 12,
         paddingVertical: 8,
@@ -296,7 +289,6 @@ const styles = StyleSheet.create({
     ghostText: {
         fontWeight: '700',
     },
-
     primaryBtn: {
         paddingHorizontal: 14,
         paddingVertical: 8,
@@ -307,8 +299,6 @@ const styles = StyleSheet.create({
     primaryText: {
         fontWeight: '800',
     },
-
-    /* Footer */
     footer: {
         marginTop: 28,
         alignItems: 'center',

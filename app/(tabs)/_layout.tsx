@@ -15,42 +15,45 @@ export default function TabLayout() {
     return (
         <Tabs
             screenOptions={{
-                tabBarActiveTintColor: '#9A7B4F',
-                tabBarInactiveTintColor: '#9A7B4F',
+                tabBarActiveTintColor: '#0056B3',
+                tabBarInactiveTintColor: '#6B7A90',
                 headerShown: false,
                 tabBarButton: HapticTab, // mantemos, mas precisa respeitar props
                 tabBarBackground: TabBarBackground,
-                tabBarStyle: Platform.select({
-                    ios: { position: 'absolute' },
-                    default: {},
-                }),
+                tabBarStyle: [
+                    { backgroundColor: '#FFFFFF', borderTopColor: '#E1E9F0' },
+                    Platform.select({
+                        ios: { position: 'absolute' },
+                        default: {},
+                    }),
+                ],
             }}
         >
             <Tabs.Screen
                 name="index"
                 options={{
-                    title: 'Home',
+                    title: 'Início',
                     tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
                 }}
             />
             <Tabs.Screen
                 name="explore"
                 options={{
-                    title: 'Explore',
-                    tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+                    title: 'Bíblia',
+                    tabBarIcon: ({ color }) => <IconSymbol size={28} name="book.fill" color={color} />,
                 }}
             />
             <Tabs.Screen
                 name="Profile"
                 options={{
-                    title: 'Profile',
-                    tabBarIcon: ({ color }) => <IconSymbol size={28} name="clock" color={color} />,
+                    title: 'Eventos',
+                    tabBarIcon: ({ color }) => <IconSymbol size={28} name="calendar" color={color} />,
                 }}
             />
             <Tabs.Screen
                 name="settings"
                 options={{
-                    title: 'Settings',
+                    title: 'Ajustes',
                     tabBarIcon: ({ color }) => <IconSymbol size={28} name="gear" color={color} />,
                 }}
             />

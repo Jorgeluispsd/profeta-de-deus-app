@@ -5,9 +5,17 @@ import {
     TouchableOpacity,
     ScrollView,
     StyleSheet,
-    useColorScheme,
+    Animated,
+    LayoutAnimation,
+    Platform,
+    UIManager,
 } from 'react-native';
+import { router } from 'expo-router';
 import versiculosPorCapitulo from '../../functions/versiculos/versiculosPorCapitulo'; // Dados importados
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+    UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 const livrosBiblia = Object.keys(versiculosPorCapitulo).map((livro) => ({
     nome: livro,
@@ -15,16 +23,15 @@ const livrosBiblia = Object.keys(versiculosPorCapitulo).map((livro) => ({
 }));
 
 export default function TelaBiblia() {
-    const scheme = useColorScheme();
-    const dark = scheme === 'dark' || true;
-
     const colors = {
-        background: '#0E1416',
-        surface: '#11181A',
-        muted: '#A7B0B3',
-        primary: '#9A7B4F', // dourado
-        accent: '#1E7A8C',
-        white: '#F6F7F8',
+        background: '#FFFFFF',
+        surface: '#F4F7FA',
+        muted: '#6B7A90',
+        primary: '#0056B3', // azul
+        accent: '#00A8E8',
+        white: '#0B132B',
+        trueWhite: '#FFFFFF',
+        border: '#E1E9F0',
     };
 
     const [livroExpandido, setLivroExpandido] = useState<string | null>(null);
@@ -32,12 +39,14 @@ export default function TelaBiblia() {
     const [versiculoSelecionado, setVersiculoSelecionado] = useState<number | null>(null);
 
     const handleSelecionarLivro = (nome: string) => {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setLivroExpandido(livroExpandido === nome ? null : nome);
         setCapituloAtivo(null);
         setVersiculoSelecionado(null);
     };
 
     const handleSelecionarCapitulo = (livro: string, capitulo: number) => {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setCapituloAtivo({ livro, capitulo });
         setVersiculoSelecionado(null);
     };
@@ -52,139 +61,193 @@ export default function TelaBiblia() {
 
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
-            <Text style={[styles.titulo, { color: colors.primary }]}>Livros da Bíblia</Text>
-            <ScrollView>
-                {livrosBiblia.map((livro) => (
-                    <View key={livro.nome}>
-                        <TouchableOpacity
-                            style={[styles.livroContainer, { backgroundColor: colors.surface }]}
-                            onPress={() => handleSelecionarLivro(livro.nome)}
-                        >
-                            <Text style={[styles.livroTexto, { color: colors.primary }]}>{livro.nome}</Text>
-                            <Text style={{ color: colors.primary }}>
-                                {livroExpandido === livro.nome ? '▲' : '▼'}
-                            </Text>
-                        </TouchableOpacity>
+            <View style={styles.headerArea}>
+                <Text style={[styles.mainTitle, { color: colors.white }]}>Bíblia Sagrada</Text>
+                <Text style={[styles.subText, { color: colors.muted }]}>Selecione um livro para começar a leitura</Text>
 
-                        {livroExpandido === livro.nome && (
-                            <>
-                                <Text style={[styles.subtitulo, { color: colors.primary }]}>Capítulos</Text>
-                                <View style={styles.capitulosContainer}>
-                                    {Array.from({ length: livro.capitulos }, (_, i) => i + 1).map((cap) => (
-                                        <TouchableOpacity
-                                            key={cap}
-                                            style={[
-                                                styles.botaoNumero,
-                                                {
-                                                    backgroundColor:
-                                                        capituloAtivo?.capitulo === cap ? colors.primary : colors.surface,
-                                                    borderColor: colors.primary,
-                                                },
-                                            ]}
-                                            onPress={() => handleSelecionarCapitulo(livro.nome, cap)}
-                                        >
-                                            <Text
-                                                style={[
-                                                    styles.numeroTexto,
-                                                    {
-                                                        color:
-                                                            capituloAtivo?.capitulo === cap ? colors.surface : colors.primary,
-                                                    },
-                                                ]}
-                                            >
-                                                {cap}
-                                            </Text>
-                                        </TouchableOpacity>
-                                    ))}
-                                </View>
-                            </>
-                        )}
+                <TouchableOpacity style={[styles.studiesBtn, { backgroundColor: colors.surface, borderColor: colors.border }]} onPress={() => router.push('/estudos')}>
+                    <Text style={{ fontSize: 18, marginRight: 8 }}>📚</Text>
+                    <Text style={[styles.studiesBtnText, { color: colors.primary }]}>Estudos e Trilhas</Text>
+                </TouchableOpacity>
+            </View>
 
-                        {capituloAtivo?.livro === livro.nome && (
-                            <>
-                                <Text style={[styles.subtitulo, { color: colors.primary }]}>Versículos</Text>
-                                <View style={styles.capitulosContainer}>
-                                    {Array.from(
-                                        { length: obterVersiculosPorCapitulo(livro.nome, capituloAtivo.capitulo) },
-                                        (_, i) => i + 1
-                                    ).map((vers) => (
-                                        <TouchableOpacity
-                                            key={vers}
-                                            style={[
-                                                styles.botaoNumero,
-                                                {
-                                                    backgroundColor:
-                                                        versiculoSelecionado === vers ? colors.primary : colors.surface,
-                                                    borderColor: colors.primary,
-                                                },
-                                            ]}
-                                            onPress={() => handleSelecionarVersiculo(vers)}
-                                        >
-                                            <Text
-                                                style={[
-                                                    styles.numeroTexto,
-                                                    { color: versiculoSelecionado === vers ? colors.surface : colors.primary },
-                                                ]}
-                                            >
-                                                {vers}
-                                            </Text>
-                                        </TouchableOpacity>
-                                    ))}
-                                </View>
-                            </>
-                        )}
-
-                        {versiculoSelecionado !== null && capituloAtivo?.livro === livro.nome && (
-                            <View style={[styles.escrituraBox, { backgroundColor: colors.surface, borderColor: colors.primary }]}>
-                                <Text style={[styles.escrituraTexto, { color: colors.white }]}>
-                                    Esta é uma mensagem de teste para o versículo {versiculoSelecionado} de {capituloAtivo.livro} {capituloAtivo.capitulo}.
+            <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+                <View style={[styles.listWrapper, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                    {livrosBiblia.map((livro, index) => (
+                        <View key={livro.nome}>
+                            <TouchableOpacity
+                                activeOpacity={0.7}
+                                style={[
+                                    styles.livroRow,
+                                    index !== livrosBiblia.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.border }
+                                ]}
+                                onPress={() => handleSelecionarLivro(livro.nome)}
+                            >
+                                <Text style={[styles.livroTexto, { color: colors.white }]}>{livro.nome}</Text>
+                                <Text style={{ color: colors.primary, fontWeight: '700', fontSize: 16 }}>
+                                    {livroExpandido === livro.nome ? '˄' : '˅'}
                                 </Text>
-                            </View>
-                        )}
-                    </View>
-                ))}
+                            </TouchableOpacity>
+
+                            {livroExpandido === livro.nome && (
+                                <View style={[styles.expandedContent, { backgroundColor: colors.trueWhite }]}>
+                                    <Text style={[styles.sectionHeading, { color: colors.muted }]}>ESCOLHA O CAPÍTULO</Text>
+                                    <View style={styles.capitulosGrid}>
+                                        {Array.from({ length: livro.capitulos }, (_, i) => i + 1).map((cap) => {
+                                            const isActive = capituloAtivo?.capitulo === cap;
+                                            return (
+                                                <TouchableOpacity
+                                                    key={cap}
+                                                    style={[
+                                                        styles.botaoNumero,
+                                                        {
+                                                            backgroundColor: isActive ? colors.primary : colors.surface,
+                                                            borderColor: isActive ? colors.primary : colors.border,
+                                                        },
+                                                    ]}
+                                                    onPress={() => handleSelecionarCapitulo(livro.nome, cap)}
+                                                >
+                                                    <Text style={[styles.numeroTexto, { color: isActive ? colors.trueWhite : colors.primary }]}>
+                                                        {cap}
+                                                    </Text>
+                                                </TouchableOpacity>
+                                            );
+                                        })}
+                                    </View>
+                                </View>
+                            )}
+
+                            {capituloAtivo?.livro === livro.nome && (
+                                <View style={[styles.expandedContent, { backgroundColor: colors.trueWhite, borderTopWidth: 1, borderTopColor: colors.surface }]}>
+                                    <Text style={[styles.sectionHeading, { color: colors.muted }]}>CAPÍTULO {capituloAtivo.capitulo} - VERSÍCULOS</Text>
+                                    <View style={styles.capitulosGrid}>
+                                        {Array.from(
+                                            { length: obterVersiculosPorCapitulo(livro.nome, capituloAtivo.capitulo) },
+                                            (_, i) => i + 1
+                                        ).map((vers) => {
+                                            const isActive = versiculoSelecionado === vers;
+                                            return (
+                                                <TouchableOpacity
+                                                    key={vers}
+                                                    style={[
+                                                        styles.botaoNumero,
+                                                        styles.botaoVersiculo,
+                                                        {
+                                                            backgroundColor: isActive ? colors.primary : colors.surface,
+                                                            borderColor: isActive ? colors.primary : 'transparent',
+                                                        },
+                                                    ]}
+                                                    onPress={() => handleSelecionarVersiculo(vers)}
+                                                >
+                                                    <Text style={[styles.numeroTexto, { color: isActive ? colors.trueWhite : colors.primary }]}>
+                                                        {vers}
+                                                    </Text>
+                                                </TouchableOpacity>
+                                            )
+                                        })}
+                                    </View>
+
+                                    {versiculoSelecionado !== null && (
+                                        <View style={[styles.escrituraBox, { backgroundColor: '#F0F7FF', borderColor: '#CDE2FA', borderWidth: 1 }]}>
+                                            <Text style={[styles.escrituraBadge, { color: colors.primary }]}>
+                                                {livro.nome} {capituloAtivo.capitulo}:{versiculoSelecionado}
+                                            </Text>
+                                            <Text style={[styles.escrituraTexto, { color: colors.white }]}>
+                                                Esta é uma mensagem de leitura simulada para o versículo selecionado diretamente do banco de dados (a ser integrado).
+                                            </Text>
+                                        </View>
+                                    )}
+                                </View>
+                            )}
+                        </View>
+                    ))}
+                </View>
             </ScrollView>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, paddingTop: 50 },
-    titulo: { fontSize: 22, fontWeight: 'bold', textAlign: 'center', marginBottom: 10 },
-    subtitulo: { fontSize: 16, fontWeight: '600', marginLeft: 15, marginTop: 10 },
-    livroContainer: {
+    container: { flex: 1, paddingTop: 60 },
+    headerArea: { paddingHorizontal: 20, marginBottom: 20 },
+    mainTitle: { fontSize: 32, fontWeight: '800', letterSpacing: -0.5, marginBottom: 4 },
+    subText: { fontSize: 15, fontWeight: '500', marginBottom: 16 },
+    studiesBtn: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingHorizontal: 20,
-        paddingVertical: 15,
-        borderBottomWidth: 1,
-        borderBottomColor: '#333',
-        borderRadius: 12,
-        marginVertical: 4,
-    },
-    livroTexto: { fontSize: 16, fontWeight: '600' },
-    capitulosContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        paddingHorizontal: 10,
-        marginBottom: 10,
-    },
-    botaoNumero: {
-        width: 40,
-        height: 40,
-        margin: 5,
-        justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: 8,
+        alignSelf: 'flex-start',
+        paddingHorizontal: 14,
+        paddingVertical: 10,
+        borderRadius: 12,
         borderWidth: 1,
     },
+    studiesBtnText: {
+        fontSize: 14,
+        fontWeight: '800',
+    },
+    
+    scrollContent: { paddingHorizontal: 16, paddingBottom: 60 },
+    
+    listWrapper: {
+        borderRadius: 16,
+        borderWidth: 1,
+        overflow: 'hidden',
+    },
+    livroRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        paddingVertical: 18,
+    },
+    livroTexto: { fontSize: 17, fontWeight: '600' },
+    
+    expandedContent: {
+        paddingHorizontal: 16,
+        paddingVertical: 16,
+    },
+    sectionHeading: {
+        fontSize: 12,
+        fontWeight: '800',
+        letterSpacing: 1,
+        marginBottom: 12,
+        marginLeft: 4,
+    },
+    capitulosGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+    },
+    botaoNumero: {
+        width: 44,
+        height: 44,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 22, // circular "organic" buttons
+        borderWidth: 1,
+    },
+    botaoVersiculo: {
+        width: 38,
+        height: 38,
+        borderRadius: 12, // different squircle shape for verses
+    },
     numeroTexto: {
-        fontWeight: 'bold',
+        fontWeight: '700',
+        fontSize: 15,
     },
+    
     escrituraBox: {
-        margin: 10,
-        padding: 15,
-        borderRadius: 12,
+        marginTop: 20,
+        padding: 16,
+        borderRadius: 14,
     },
-    escrituraTexto: { fontSize: 16 },
+    escrituraBadge: {
+        fontSize: 13,
+        fontWeight: '800',
+        marginBottom: 8,
+    },
+    escrituraTexto: { 
+        fontSize: 16,
+        lineHeight: 24,
+    },
 });

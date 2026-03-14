@@ -4,6 +4,7 @@ import {
     useColorScheme,
     useWindowDimensions,
     Image,
+    ImageBackground,
     ScrollView,
     StyleSheet,
     Text,
@@ -11,15 +12,16 @@ import {
     StatusBar,
     TouchableOpacity,
 } from 'react-native';
+import { router } from 'expo-router';
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
 const cards = [
-    { id: 1, title: 'Encontro de Mulheres', content: '20/05 • 18h', image: require('@/assets/images/culto-mulheres.jpg') },
-    { id: 2, title: 'Culto Jovem', content: '10/06 • 19h', image: require('@/assets/images/jovens.jpg') },
-    { id: 3, title: 'Batismo', content: '25/06 • 10h', image: require('@/assets/images/batismo.jpg') },
+    { id: 1, date: '20 MAI', title: 'Encontro de Mulheres', subtitle: 'Momento Especial', time: '18:00', image: require('@/assets/images/culto-mulheres.jpg') },
+    { id: 2, date: '10 JUN', title: 'Culto Jovem', subtitle: 'Venha e traga um amigo', time: '19:00', image: require('@/assets/images/jovens.jpg') },
+    { id: 3, date: '25 JUN', title: 'Batismo Sede', subtitle: 'Festa nas águas', time: '10:00', image: require('@/assets/images/batismo.jpg') },
 ];
 
 export default function HomeScreen() {
@@ -28,12 +30,14 @@ export default function HomeScreen() {
     const { width, height } = useWindowDimensions();
 
     const colors = {
-        background: '#0E1416',
-        surface: '#11181A',
-        muted: '#A7B0B3',
-        primary: '#9A7B4F',
-        accent: '#1E7A8C',
-        white: '#F6F7F8',
+        background: '#FFFFFF',
+        surface: '#F4F7FA',
+        muted: '#6B7A90',
+        primary: '#0056B3',
+        accent: '#00A8E8',
+        white: '#0B132B', // now acts as dark text against white bg
+        trueWhite: '#FFFFFF', // added for situations needing actual white
+        border: '#E1E9F0',
     };
 
     return (
@@ -42,18 +46,18 @@ export default function HomeScreen() {
             <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.background }]} /> {/* AJUSTE DE FUNDO */}
 
             <View style={[styles.root, { backgroundColor: colors.background }]}>
-                <StatusBar barStyle="light-content" backgroundColor={colors.background} translucent /> {/* AJUSTE DE FUNDO */}
+                <StatusBar barStyle="dark-content" backgroundColor={colors.background} translucent /> {/* AJUSTE DE FUNDO */}
                 <ParallaxScrollView
-                    headerBackgroundColor={{ light: '#FFFFFF', dark: colors.background }}
+                    headerBackgroundColor={{ light: '#FFFFFF', dark: '#FFFFFF' }}
                     headerImage={
-                        <View style={[styles.headerWrapper, { width, backgroundColor: '#0F2B2F' }]}>
+                        <View style={[styles.headerWrapper, { width, backgroundColor: '#E1E9F0' }]}>
                             <Image
-                                source={require('@/assets/images/pombo.jpg')}
+                                source={require('@/assets/images/new-logo-v2.png')}
                                 style={styles.headerImage}
-                                resizeMode="contain"
+                                resizeMode="cover"
                             />
                             <View style={styles.headerBadge}>
-                                <Text style={[styles.headerBadgeText, { color: colors.white }]}>Igreja</Text>
+                                <Text style={[styles.headerBadgeText, { color: colors.trueWhite }]}>Igreja</Text>
                             </View>
                         </View>
                     }
@@ -62,6 +66,22 @@ export default function HomeScreen() {
                         <View style={styles.titleRow}>
                             <Text style={[styles.mainTitle, { color: colors.white }]}>Igreja Profetas de Deus</Text>
                             <HelloWave />
+                        </View>
+
+                        {/* Quick Actions Menu */}
+                        <View style={styles.quickActionsContainer}>
+                            <TouchableOpacity style={[styles.quickActionBtn, { backgroundColor: colors.surface, borderColor: colors.border }]} onPress={() => router.push('/oracao')}>
+                                <Text style={styles.quickActionIcon}>🙏</Text>
+                                <Text style={[styles.quickActionLabel, { color: colors.white }]}>Oração</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={[styles.quickActionBtn, { backgroundColor: colors.surface, borderColor: colors.border }]} onPress={() => router.push('/campanhas')}>
+                                <Text style={styles.quickActionIcon}>🤝</Text>
+                                <Text style={[styles.quickActionLabel, { color: colors.white }]}>Projetos</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={[styles.quickActionBtn, { backgroundColor: colors.surface, borderColor: colors.border }]} onPress={() => router.push('/aniversariantes')}>
+                                <Text style={styles.quickActionIcon}>🎂</Text>
+                                <Text style={[styles.quickActionLabel, { color: colors.white }]}>Parabéns</Text>
+                            </TouchableOpacity>
                         </View>
 
                         <View style={[styles.sectionCard, { backgroundColor: colors.surface }]}>
@@ -75,8 +95,8 @@ export default function HomeScreen() {
                                 Fundada em 2016, crescemos em fé e serviço — campanhas evangelísticas e trabalho social
                                 são pilares do nosso ministério.
                             </Text>
-                            <TouchableOpacity style={[styles.cta, { borderColor: colors.primary }]}>
-                                <Text style={[styles.ctaText, { color: colors.primary }]}>Saiba mais</Text>
+                            <TouchableOpacity style={[styles.cta, { borderColor: colors.primary }]} onPress={() => router.push('/historia')}>
+                                <Text style={[styles.ctaText, { color: colors.primary }]}>Saiba mais sobre nós</Text>
                             </TouchableOpacity>
                         </View>
 
@@ -88,32 +108,38 @@ export default function HomeScreen() {
                         <ScrollView
                             horizontal
                             showsHorizontalScrollIndicator={false}
-                            contentContainerStyle={styles.carousel}
-                            snapToInterval={Math.round(width * 0.78) + 16}
+                            contentContainerStyle={[
+                                styles.carousel,
+                                { paddingHorizontal: (width - Math.round(width * 0.85)) / 2 }
+                            ]}
+                            snapToInterval={Math.round(width * 0.85) + 16}
+                            snapToAlignment="start"
                             decelerationRate="fast"
+                            disableIntervalMomentum={true}
+                            pagingEnabled={false}
+                            scrollEventThrottle={16}
                         >
-                            {cards.map((c) => (
-                                <View
-                                    key={c.id}
-                                    style={[
-                                        styles.eventCard,
-                                        { width: Math.round(width * 0.78), backgroundColor: '#0D1516' },
-                                    ]}
-                                >
-                                    <Image source={c.image} style={styles.eventImage} />
-                                    <View style={styles.eventBody}>
-                                        <Text style={[styles.eventTitle, { color: colors.white }]}>{c.title}</Text>
-                                        <Text style={[styles.eventMeta, { color: colors.muted }]}>{c.content}</Text>
-                                        <View style={styles.eventFooter}>
-                                            <TouchableOpacity style={[styles.ghostBtn, { borderColor: colors.primary }]}>
-                                                <Text style={[styles.ghostText, { color: colors.primary }]}>Detalhes</Text>
-                                            </TouchableOpacity>
-                                            <TouchableOpacity style={[styles.primaryBtn, { backgroundColor: colors.primary }]}>
-                                                <Text style={[styles.primaryText, { color: colors.surface }]}>Participar</Text>
-                                            </TouchableOpacity>
+                            {cards.map((e) => (
+                                <TouchableOpacity key={e.id} activeOpacity={0.9} style={[styles.specialEventCard, { width: Math.round(width * 0.85) }]}>
+                                    <ImageBackground source={e.image} style={styles.eventImageBg} imageStyle={{ borderRadius: 16 }}>
+                                        <View style={styles.imageOverlay} />
+                                        
+                                        <View style={styles.eventTopInfo}>
+                                            <View style={[styles.dateTicket, { backgroundColor: colors.trueWhite }]}>
+                                                <Text style={[styles.ticketDay, { color: colors.primary }]}>{e.date.split(' ')[0]}</Text>
+                                                <Text style={[styles.ticketMonth, { color: colors.white }]}>{e.date.split(' ')[1]}</Text>
+                                            </View>
+                                            <View style={[styles.timeTicket, { backgroundColor: 'rgba(0,0,0,0.4)' }]}>
+                                                <Text style={{ color: colors.trueWhite, fontSize: 13, fontWeight: '600' }}>{e.time}</Text>
+                                            </View>
                                         </View>
-                                    </View>
-                                </View>
+
+                                        <View style={styles.eventBottomInfo}>
+                                            <Text style={[styles.specialEventTitle, { color: colors.trueWhite }]} numberOfLines={2}>{e.title}</Text>
+                                            <Text style={[styles.specialEventSubtitle, { color: 'rgba(255,255,255,0.8)' }]}>{e.subtitle}</Text>
+                                        </View>
+                                    </ImageBackground>
+                                </TouchableOpacity>
                             ))}
                         </ScrollView>
 
@@ -146,7 +172,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
     root: {
         flex: 1,
-        backgroundColor: '#0C1618', // cobre tudo // AJUSTE DE FUNDO
+        backgroundColor: '#FFFFFF', // cobre tudo // AJUSTE DE FUNDO
     },
     safe: {
         flex: 1,
@@ -159,9 +185,9 @@ const styles = StyleSheet.create({
         position: 'relative',
     },
     headerImage: {
-        height: 160,
-        width: 300,
-        opacity: 0.98,
+        height: '100%',
+        width: '100%',
+        opacity: 1,
     },
     headerBadge: {
         position: 'absolute',
@@ -190,6 +216,33 @@ const styles = StyleSheet.create({
         fontWeight: '800',
         letterSpacing: 0.2,
         textAlign: 'center',
+    },
+    quickActionsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginHorizontal: 16,
+        marginTop: 20,
+        gap: 12,
+    },
+    quickActionBtn: {
+        flex: 1,
+        alignItems: 'center',
+        paddingVertical: 14,
+        borderRadius: 16,
+        borderWidth: 1,
+        shadowColor: 'rgba(0,0,0,0.03)',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 1,
+        shadowRadius: 8,
+        elevation: 2,
+    },
+    quickActionIcon: {
+        fontSize: 28,
+        marginBottom: 6,
+    },
+    quickActionLabel: {
+        fontSize: 12,
+        fontWeight: '700',
     },
     sectionCard: {
         marginHorizontal: 16,
@@ -248,47 +301,51 @@ const styles = StyleSheet.create({
     },
     carousel: {
         paddingVertical: 12,
-        paddingHorizontal: 12,
+        // paddingHorizontal is dynamic inline
     },
-    eventCard: {
-        marginRight: 12,
-        borderRadius: 14,
-        overflow: 'hidden',
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.03)',
+    specialEventCard: {
+        height: 220,
+        marginRight: 16,
+        borderRadius: 16,
+        shadowColor: 'rgba(0,86,179,0.15)',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 1,
+        shadowRadius: 12,
+        elevation: 5,
     },
-    eventImage: {
+    eventImageBg: {
         width: '100%',
-        height: 140,
+        height: '100%',
+        justifyContent: 'space-between',
+        padding: 16,
     },
-    eventBody: {
-        padding: 12,
+    imageOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(0,0,0,0.3)',
+        borderRadius: 16,
     },
-    eventTitle: {
-        fontSize: 16,
-        fontWeight: '800',
-    },
-    eventMeta: {
-        marginTop: 6,
-        fontSize: 13,
-    },
-    eventFooter: {
-        marginTop: 10,
+    eventTopInfo: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        gap: 8,
+        alignItems: 'flex-start',
     },
-    ghostBtn: {
+    dateTicket: {
+        paddingVertical: 6,
         paddingHorizontal: 12,
-        paddingVertical: 8,
         borderRadius: 10,
-        borderWidth: 1,
         alignItems: 'center',
-        justifyContent: 'center',
     },
-    ghostText: {
-        fontWeight: '700',
+    ticketDay: { fontSize: 20, fontWeight: '900', lineHeight: 22 },
+    ticketMonth: { fontSize: 11, fontWeight: '800', textTransform: 'uppercase', opacity: 0.7 },
+    
+    timeTicket: {
+        paddingVertical: 6,
+        paddingHorizontal: 10,
+        borderRadius: 8,
     },
+    eventBottomInfo: { marginTop: 'auto' },
+    specialEventTitle: { fontSize: 20, fontWeight: '800', marginBottom: 4 },
+    specialEventSubtitle: { fontSize: 14, fontWeight: '500' },
     primaryBtn: {
         paddingHorizontal: 14,
         paddingVertical: 8,

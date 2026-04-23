@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Alert, ActivityIndicator, SafeAreaView, ScrollView } from 'react-native';
 import { Stack, router } from 'expo-router';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../../lib/supabase';
 
-export default function OracaoScreen() {
+export default function LoginScreen() {
     const colors = {
         background: '#FFFFFF',
         surface: '#F4F7FA',
@@ -14,105 +14,93 @@ export default function OracaoScreen() {
         border: '#E1E9F0',
     };
 
-    const [nome, setNome] = useState('');
-    const [pedido, setPedido] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleSubmit = async () => {
-        if (!nome.trim() || !pedido.trim()) {
-            Alert.alert('Atenção', 'Por favor, preencha seu nome e o seu pedido de oração.');
+    const handleLogin = async () => {
+        if (!email.trim() || !password.trim()) {
+            Alert.alert('Atenção', 'Preencha o e-mail e a senha.');
             return;
         }
 
         setIsLoading(true);
-        
-        // Envio para o Supabase
-        const { error } = await supabase
-            .from('oracoes')
-            .insert([
-                { nome: nome.trim(), pedido: pedido.trim() }
-            ]);
-
+        const { error } = await supabase.auth.signInWithPassword({
+            email: email.trim(),
+            password: password.trim(),
+        });
         setIsLoading(false);
 
         if (error) {
-            Alert.alert('Erro', 'Ocorreu um erro ao enviar seu pedido. Tente novamente mais tarde.');
-            console.error('Erro no Supabase:', error);
-            return;
+            Alert.alert('Erro no Login', error.message);
+        } else {
+            router.replace('/(tabs)/settings');
         }
-        
-        Alert.alert(
-            'Pedido Enviado!', 
-            'Estaremos orando por você e por sua família! Deus abençoe.',
-            [{ text: 'Amém', onPress: () => {
-                setNome('');
-                setPedido('');
-                router.back();
-            }}]
-        );
     };
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
             <Stack.Screen 
                 options={{ 
-                    headerTitle: 'Pedido de Oração',
+                    headerTitle: 'Acessar Conta',
                     headerBackTitle: 'Voltar',
                     headerTintColor: colors.primary,
                     headerStyle: { backgroundColor: colors.background },
                     headerShadowVisible: false,
                 }} 
             />
-            <KeyboardAvoidingView 
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={{ flex: 1 }}
-            >
-                <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-                    
+            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+                <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
                     <View style={styles.header}>
-                        <Text style={{ fontSize: 48, marginBottom: 12 }}>🙏</Text>
-                        <Text style={[styles.title, { color: colors.white }]}>Como podemos orar por você?</Text>
+                        <Text style={{ fontSize: 48, marginBottom: 12 }}>👋</Text>
+                        <Text style={[styles.title, { color: colors.white }]}>Bem-vindo de volta!</Text>
                         <Text style={[styles.subtitle, { color: colors.muted }]}>
-                            Deixe seu pedido. Nossa equipe pastoral e intercessores estarão clamando ao Senhor pela sua vida!
+                            Faça login para acessar seu perfil e ver os próximos eventos.
                         </Text>
                     </View>
 
                     <View style={styles.form}>
-                        <Text style={[styles.label, { color: colors.white }]}>Seu Nome</Text>
+                        <Text style={[styles.label, { color: colors.white }]}>E-mail</Text>
                         <TextInput 
                             style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.white }]}
-                            placeholder="Ex: João da Silva"
+                            placeholder="seu@email.com"
                             placeholderTextColor={colors.muted}
-                            value={nome}
-                            onChangeText={setNome}
+                            keyboardType="email-address"
+                            autoCapitalize="none"
+                            value={email}
+                            onChangeText={setEmail}
                         />
 
-                        <Text style={[styles.label, { color: colors.white }]}>Seu Pedido</Text>
+                        <Text style={[styles.label, { color: colors.white }]}>Senha</Text>
                         <TextInput 
-                            style={[styles.inputArea, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.white }]}
-                            placeholder="Descreva aqui o seu pedido de oração. Deus está no controle de tudo..."
+                            style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.white }]}
+                            placeholder="Sua senha secreta"
                             placeholderTextColor={colors.muted}
-                            multiline
-                            numberOfLines={5}
-                            textAlignVertical="top"
-                            value={pedido}
-                            onChangeText={setPedido}
+                            secureTextEntry
+                            value={password}
+                            onChangeText={setPassword}
                         />
 
                         <TouchableOpacity 
                             style={[styles.btnSubmit, { backgroundColor: colors.primary, opacity: isLoading ? 0.7 : 1 }]}
                             activeOpacity={0.8}
-                            onPress={handleSubmit}
+                            onPress={handleLogin}
                             disabled={isLoading}
                         >
                             {isLoading ? (
                                 <ActivityIndicator color="#FFFFFF" />
                             ) : (
-                                <Text style={styles.btnText}>Enviar Pedido de Oração</Text>
+                                <Text style={styles.btnText}>Entrar</Text>
                             )}
                         </TouchableOpacity>
-                    </View>
 
+                        <View style={styles.footer}>
+                            <Text style={{ color: colors.muted }}>Ainda não tem conta? </Text>
+                            <TouchableOpacity onPress={() => router.push('/auth/register')}>
+                                <Text style={{ color: colors.primary, fontWeight: '700' }}>Cadastre-se</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
                 </ScrollView>
             </KeyboardAvoidingView>
         </SafeAreaView>
@@ -121,9 +109,9 @@ export default function OracaoScreen() {
 
 const styles = StyleSheet.create({
     container: {
+        flexGrow: 1,
         paddingHorizontal: 20,
         paddingTop: 20,
-        paddingBottom: 40,
     },
     header: {
         alignItems: 'center',
@@ -158,15 +146,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginBottom: 20,
     },
-    inputArea: {
-        height: 150,
-        borderWidth: 1,
-        borderRadius: 12,
-        paddingHorizontal: 16,
-        paddingVertical: 16,
-        fontSize: 16,
-        marginBottom: 30,
-    },
     btnSubmit: {
         height: 56,
         borderRadius: 14,
@@ -177,10 +156,17 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 10,
         elevation: 6,
+        marginTop: 10,
     },
     btnText: {
         color: '#FFFFFF',
         fontSize: 16,
         fontWeight: '800',
     },
+    footer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: 30,
+        marginBottom: 30,
+    }
 });

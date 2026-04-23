@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     SafeAreaView,
     useColorScheme,
@@ -9,8 +9,11 @@ import {
     Switch,
     TouchableOpacity,
     ScrollView,
+    Alert,
 } from 'react-native';
 import { router } from 'expo-router';
+import { supabase } from '../../lib/supabase';
+import { User } from '@supabase/supabase-js';
 
 export default function SettingsScreen() {
     const colors = {
@@ -24,8 +27,35 @@ export default function SettingsScreen() {
         border: '#E1E9F0',
     };
 
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [user, setUser] = useState<User | null>(null);
     const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            setUser(user);
+        };
+        fetchUser();
+
+        const { data: authListener } = supabase.auth.onAuthStateChange(
+            async (event, session) => {
+                setUser(session?.user ?? null);
+            }
+        );
+
+        return () => {
+            authListener.subscription.unsubscribe();
+        };
+    }, []);
+
+    const handleAuthAction = async () => {
+        if (user) {
+            const { error } = await supabase.auth.signOut();
+            if (error) Alert.alert('Erro ao sair', error.message);
+        } else {
+            router.push('/auth/login');
+        }
+    };
 
     return (
         <View style={[styles.root, { backgroundColor: colors.background }]}>
@@ -43,14 +73,14 @@ export default function SettingsScreen() {
                     <View style={[styles.settingsWrapper, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                         <View style={styles.settingRow}>
                             <Text style={[styles.rowLabel, { color: colors.white }]}>
-                                {isLoggedIn ? 'Logado como Pastor(a)' : 'Não conectado'}
+                                {user ? `Logado como ${user.user_metadata?.nome || user.email}` : 'Não conectado'}
                             </Text>
                             <TouchableOpacity
                                 style={[styles.primaryBtn, { backgroundColor: colors.primary }]}
-                                onPress={() => setIsLoggedIn(!isLoggedIn)}
+                                onPress={handleAuthAction}
                                 activeOpacity={0.8}
                             >
-                                <Text style={styles.primaryText}>{isLoggedIn ? 'Sair' : 'Entrar'}</Text>
+                                <Text style={styles.primaryText}>{user ? 'Sair' : 'Entrar'}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

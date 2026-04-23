@@ -1,6 +1,7 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, Image, ImageBackground, TouchableOpacity, useColorScheme, useWindowDimensions } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TextInput, Image, ImageBackground, TouchableOpacity, useColorScheme, useWindowDimensions, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
+import { supabase } from '../../lib/supabase';
 
 export default function EventsScreen() {
     const scheme = useColorScheme();
@@ -22,10 +23,44 @@ export default function EventsScreen() {
         { id: 2, title: 'Culto de Libertação', day: 'Qua', times: ['08:00','15:00','18:00'], highlight: 'Campanha de Milagres', address: 'R. Marli, 191 - São Paulo' },
     ];
 
-    const specialEvents = [
-        { id: 1, date: '09 MAR', title: 'Culto da Família Especial', subtitle: 'Avivamento com Pr Thony', time: '20:00', image: require('../../assets/images/card1.png') },
-        { id: 2, date: '16 MAR', title: 'Culto da Cura Divina', subtitle: 'Ministração Pra Luzia', time: '19:30', image: require('../../assets/images/card2.png') },
-    ];
+    const [specialEvents, setSpecialEvents] = useState<any[]>([]);
+    const [loadingEvents, setLoadingEvents] = useState(true);
+
+    useEffect(() => {
+        const fetchEvents = async () => {
+            setLoadingEvents(true);
+            const { data, error } = await supabase
+                .from('eventos')
+                .select('*')
+                .order('data_evento', { ascending: true });
+            
+            if (error) {
+                console.error("Erro ao buscar eventos:", error);
+            } else if (data) {
+                const formatted = data.map(item => {
+                    const dateObj = new Date(item.data_evento);
+                    const months = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
+                    const day = dateObj.getUTCDate().toString().padStart(2, '0');
+                    const month = months[dateObj.getUTCMonth()];
+                    const hours = dateObj.getUTCHours().toString().padStart(2, '0');
+                    const minutes = dateObj.getUTCMinutes().toString().padStart(2, '0');
+                    
+                    return {
+                        id: item.id,
+                        date: `${day} ${month}`,
+                        title: item.titulo,
+                        subtitle: item.descricao,
+                        time: `${hours}:${minutes}`,
+                        image: require('../../assets/images/card1.png') // Imagem genérica provisória
+                    };
+                });
+                setSpecialEvents(formatted);
+            }
+            setLoadingEvents(false);
+        };
+
+        fetchEvents();
+    }, []);
 
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -107,40 +142,46 @@ export default function EventsScreen() {
                     </TouchableOpacity>
                 </View>
 
-                <ScrollView 
-                    horizontal 
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{ paddingHorizontal: 4, paddingBottom: 20 }}
-                    snapToInterval={Math.round(width * 0.85) + 16}
-                    snapToAlignment="start"
-                    decelerationRate="fast"
-                    disableIntervalMomentum={true}
-                    pagingEnabled={false}
-                    scrollEventThrottle={16}
-                >
-                    {specialEvents.map((e) => (
-                        <TouchableOpacity key={e.id} activeOpacity={0.9} style={[styles.specialEventCard, { width: Math.round(width * 0.85) }]}>
-                            <ImageBackground source={e.image} style={styles.eventImageBg} imageStyle={{ borderRadius: 16 }}>
-                                <View style={styles.imageOverlay} />
-                                
-                                <View style={styles.eventTopInfo}>
-                                    <View style={[styles.dateTicket, { backgroundColor: colors.trueWhite }]}>
-                                        <Text style={[styles.ticketDay, { color: colors.primary }]}>{e.date.split(' ')[0]}</Text>
-                                        <Text style={[styles.ticketMonth, { color: colors.white }]}>{e.date.split(' ')[1]}</Text>
+                {loadingEvents ? (
+                    <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 20 }} />
+                ) : specialEvents.length === 0 ? (
+                    <Text style={{ textAlign: 'center', color: colors.muted, marginTop: 20 }}>Nenhum evento especial no momento.</Text>
+                ) : (
+                    <ScrollView 
+                        horizontal 
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={{ paddingHorizontal: 4, paddingBottom: 20 }}
+                        snapToInterval={Math.round(width * 0.85) + 16}
+                        snapToAlignment="start"
+                        decelerationRate="fast"
+                        disableIntervalMomentum={true}
+                        pagingEnabled={false}
+                        scrollEventThrottle={16}
+                    >
+                        {specialEvents.map((e) => (
+                            <TouchableOpacity key={e.id} activeOpacity={0.9} style={[styles.specialEventCard, { width: Math.round(width * 0.85) }]}>
+                                <ImageBackground source={e.image} style={styles.eventImageBg} imageStyle={{ borderRadius: 16 }}>
+                                    <View style={styles.imageOverlay} />
+                                    
+                                    <View style={styles.eventTopInfo}>
+                                        <View style={[styles.dateTicket, { backgroundColor: colors.trueWhite }]}>
+                                            <Text style={[styles.ticketDay, { color: colors.primary }]}>{e.date.split(' ')[0]}</Text>
+                                            <Text style={[styles.ticketMonth, { color: colors.white }]}>{e.date.split(' ')[1]}</Text>
+                                        </View>
+                                        <View style={[styles.timeTicket, { backgroundColor: 'rgba(0,0,0,0.4)' }]}>
+                                            <Text style={{ color: colors.trueWhite, fontSize: 13, fontWeight: '600' }}>{e.time}</Text>
+                                        </View>
                                     </View>
-                                    <View style={[styles.timeTicket, { backgroundColor: 'rgba(0,0,0,0.4)' }]}>
-                                        <Text style={{ color: colors.trueWhite, fontSize: 13, fontWeight: '600' }}>{e.time}</Text>
-                                    </View>
-                                </View>
 
-                                <View style={styles.eventBottomInfo}>
-                                    <Text style={[styles.specialEventTitle, { color: colors.trueWhite }]} numberOfLines={2}>{e.title}</Text>
-                                    <Text style={[styles.specialEventSubtitle, { color: 'rgba(255,255,255,0.8)' }]}>{e.subtitle}</Text>
-                                </View>
-                            </ImageBackground>
-                        </TouchableOpacity>
-                    ))}
-                </ScrollView>
+                                    <View style={styles.eventBottomInfo}>
+                                        <Text style={[styles.specialEventTitle, { color: colors.trueWhite }]} numberOfLines={2}>{e.title}</Text>
+                                        <Text style={[styles.specialEventSubtitle, { color: 'rgba(255,255,255,0.8)' }]}>{e.subtitle}</Text>
+                                    </View>
+                                </ImageBackground>
+                            </TouchableOpacity>
+                        ))}
+                    </ScrollView>
+                )}
                 
                 {/* Espaçamento final */}
                 <View style={{ height: 60 }} />

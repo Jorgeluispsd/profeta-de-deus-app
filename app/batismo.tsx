@@ -1,6 +1,7 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { Stack, router } from 'expo-router';
+import { supabase } from '../lib/supabase';
 
 export default function BatismoScreen() {
     const colors = {
@@ -11,6 +12,33 @@ export default function BatismoScreen() {
         white: '#0B132B',
         trueWhite: '#FFFFFF',
         border: '#E1E9F0',
+    };
+
+    const [eventoBatismo, setEventoBatismo] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchBatismo = async () => {
+            const { data, error } = await supabase
+                .from('eventos')
+                .select('*')
+                .eq('tipo', 'batismo')
+                .gte('data_evento', new Date().toISOString()) // apenas batismos futuros
+                .order('data_evento', { ascending: true })
+                .limit(1)
+                .single();
+            
+            if (data) {
+                setEventoBatismo(data);
+            }
+            setIsLoading(false);
+        };
+        fetchBatismo();
+    }, []);
+
+    const formatDataBatismo = (dateString: string) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' });
     };
 
     return (
@@ -49,15 +77,24 @@ export default function BatismoScreen() {
                     <View style={[styles.infoCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                         <View style={styles.infoRow}>
                             <Text style={styles.infoIcon}>🗓</Text>
-                            <View>
+                            <View style={{ flex: 1 }}>
                                 <Text style={[styles.infoLabel, { color: colors.muted }]}>Próximas Águas</Text>
-                                <Text style={[styles.infoValue, { color: colors.white }]}>25 de Junho, 10:00</Text>
+                                {isLoading ? (
+                                    <ActivityIndicator size="small" color={colors.primary} style={{ alignSelf: 'flex-start', marginTop: 4 }} />
+                                ) : eventoBatismo ? (
+                                    <>
+                                        <Text style={[styles.infoValue, { color: colors.white }]}>{formatDataBatismo(eventoBatismo.data_evento)}</Text>
+                                        <Text style={[styles.infoDesc, { color: colors.muted, marginTop: 4 }]}>{eventoBatismo.titulo}</Text>
+                                    </>
+                                ) : (
+                                    <Text style={[styles.infoValue, { color: colors.muted, fontSize: 14 }]}>Nenhuma data agendada</Text>
+                                )}
                             </View>
                         </View>
                         <View style={[styles.divider, { backgroundColor: colors.border }]} />
                         <View style={styles.infoRow}>
                             <Text style={styles.infoIcon}>📍</Text>
-                            <View>
+                            <View style={{ flex: 1 }}>
                                 <Text style={[styles.infoLabel, { color: colors.muted }]}>Local</Text>
                                 <Text style={[styles.infoValue, { color: colors.white }]}>Associação Recanto Silvestre</Text>
                             </View>
@@ -156,6 +193,9 @@ const styles = StyleSheet.create({
     infoValue: {
         fontSize: 16,
         fontWeight: '700',
+    },
+    infoDesc: {
+        fontSize: 13,
     },
     divider: {
         height: 1,

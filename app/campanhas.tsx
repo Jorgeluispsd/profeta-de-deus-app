@@ -1,6 +1,7 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Stack } from 'expo-router';
+import { supabase } from '../lib/supabase';
 
 export default function CampanhasScreen() {
     const colors = {
@@ -13,11 +14,31 @@ export default function CampanhasScreen() {
         border: '#E1E9F0',
     };
 
-    const campaigns = [
-        { id: 1, title: 'Campanha de Arrecadação de Alimentos', type: 'Ação Social', date: 'Mês de Julho', desc: 'Arrecadação de cestas básicas para o asilo local. Colabore trazendo 1kg de alimento não perecível.', icon: '🥫' },
-        { id: 2, title: '21 Dias de Jejum e Oração', type: 'Espiritual', date: '01 a 21 de Agosto', desc: 'Clamor pelas famílias e despertamento espiritual da igreja.', icon: '🙌' },
-        { id: 3, title: 'Missão Nordeste', type: 'Missões', date: 'Novembro', desc: 'Arrecadação financeira para nossos missionários no sertão.', icon: '🌍' },
-    ];
+    const [campaigns, setCampaigns] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchCampaigns = async () => {
+            const { data, error } = await supabase
+                .from('eventos')
+                .select('*')
+                .eq('tipo', 'campanha')
+                .order('data_evento', { ascending: true });
+            
+            if (data) {
+                setCampaigns(data);
+            } else if (error) {
+                console.error("Erro ao buscar campanhas:", error);
+            }
+            setIsLoading(false);
+        };
+        fetchCampaigns();
+    }, []);
+
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' });
+    };
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
@@ -38,25 +59,36 @@ export default function CampanhasScreen() {
                     </Text>
                 </View>
 
-                {campaigns.map((camp) => (
-                    <View key={camp.id} style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                        <View style={styles.cardHeader}>
-                            <View style={[styles.iconWrapper, { backgroundColor: colors.trueWhite }]}>
-                                <Text style={styles.icon}>{camp.icon}</Text>
-                            </View>
-                            <View>
-                                <Text style={[styles.cardType, { color: colors.primary }]}>{camp.type}</Text>
-                                <Text style={[styles.cardDate, { color: colors.muted }]}>{camp.date}</Text>
-                            </View>
-                        </View>
-                        <Text style={[styles.cardTitle, { color: colors.white }]}>{camp.title}</Text>
-                        <Text style={[styles.cardDesc, { color: colors.muted }]}>{camp.desc}</Text>
-                        
-                        <TouchableOpacity style={[styles.btn, { backgroundColor: colors.primary }]}>
-                            <Text style={styles.btnText}>Quero Participar</Text>
-                        </TouchableOpacity>
+                {isLoading ? (
+                    <View style={{ marginTop: 40 }}>
+                        <ActivityIndicator size="large" color={colors.primary} />
                     </View>
-                ))}
+                ) : campaigns.length === 0 ? (
+                    <View style={styles.emptyState}>
+                        <Text style={[styles.emptyIcon, { color: colors.muted }]}>📋</Text>
+                        <Text style={[styles.emptyText, { color: colors.muted }]}>Nenhuma campanha ativa no momento.</Text>
+                    </View>
+                ) : (
+                    campaigns.map((camp) => (
+                        <View key={camp.id} style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                            <View style={styles.cardHeader}>
+                                <View style={[styles.iconWrapper, { backgroundColor: colors.trueWhite }]}>
+                                    <Text style={styles.icon}>🎯</Text>
+                                </View>
+                                <View>
+                                    <Text style={[styles.cardType, { color: colors.primary }]}>Campanha</Text>
+                                    <Text style={[styles.cardDate, { color: colors.muted }]}>{formatDate(camp.data_evento)}</Text>
+                                </View>
+                            </View>
+                            <Text style={[styles.cardTitle, { color: colors.white }]}>{camp.titulo}</Text>
+                            <Text style={[styles.cardDesc, { color: colors.muted }]}>{camp.descricao}</Text>
+                            
+                            <TouchableOpacity style={[styles.btn, { backgroundColor: colors.primary }]}>
+                                <Text style={styles.btnText}>Quero Participar</Text>
+                            </TouchableOpacity>
+                        </View>
+                    ))
+                )}
             </ScrollView>
         </SafeAreaView>
     );
@@ -79,6 +111,19 @@ const styles = StyleSheet.create({
     subtitle: {
         fontSize: 15,
         lineHeight: 22,
+    },
+    emptyState: {
+        alignItems: 'center',
+        marginTop: 40,
+    },
+    emptyIcon: {
+        fontSize: 48,
+        marginBottom: 16,
+    },
+    emptyText: {
+        fontSize: 16,
+        fontWeight: '600',
+        textAlign: 'center',
     },
     card: {
         borderRadius: 16,
